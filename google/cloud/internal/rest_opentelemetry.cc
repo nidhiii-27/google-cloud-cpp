@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "google/cloud/internal/rest_opentelemetry.h"
-#include "google/cloud/internal/opentelemetry.h"
-#include "google/cloud/internal/rest_context.h"
-#include "google/cloud/internal/trace_propagator.h"
-#include "google/cloud/options.h"
-#include "absl/strings/match.h"
-#include "absl/strings/str_cat.h"
+#include \"google/cloud/internal/rest_opentelemetry.h\"
+#include \"absl/strings/str_cat.h\"
+#include \"google/cloud/internal/opentelemetry.h\"
+#include \"google/cloud/internal/rest_context.h\"
+#include \"google/cloud/internal/trace_propagator.h\"
+#include \"google/cloud/options.h\"
+#include \"absl/strings/match.h\"
 #include <opentelemetry/context/propagation/global_propagator.h>
 #include <opentelemetry/context/propagation/text_map_propagator.h>
 #include <opentelemetry/semconv/network_attributes.h>
@@ -46,7 +46,7 @@ class RestClientCarrier
   // Unneeded by clients.
   opentelemetry::nostd::string_view Get(
       opentelemetry::nostd::string_view) const noexcept override {
-    return "";
+    return \"\";
   }
 
   void Set(opentelemetry::nostd::string_view key,
@@ -74,23 +74,23 @@ opentelemetry::nostd::shared_ptr<opentelemetry::trace::Span> MakeSpanHttp(
   opentelemetry::trace::StartSpanOptions options;
   options.kind = opentelemetry::trace::SpanKind::kClient;
   auto span = internal::MakeSpan(
-      absl::StrCat("HTTP/", absl::string_view{method.data(), method.size()}),
-      {{/*sc::kNetworkTransport=*/"network.transport",
+      absl::StrCat(\"HTTP/\", absl::string_view{method.data(), method.size()}),
+      {{/*sc::kNetworkTransport=*/\"network.transport\",
         sc::network::NetworkTransportValues::kTcp},
-       {/*sc::kHttpRequestMethod=*/"http.request.method", method},
-       {/*sc::kUrlFull=*/"url.full", request.path()}},
+       {/*sc::kHttpRequestMethod=*/\"http.request.method\", method},
+       {/*sc::kUrlFull=*/\"url.full\", request.path()}},
       options);
   for (auto const& kv : request.headers()) {
-    auto const name = "http.request.header." + kv.first;
-    if (kv.second.empty()) {
-      span->SetAttribute(name, "");
+    auto const name = absl::StrCat(\"http.request.header.\", kv.first.name());
+    if (kv.second.EmptyValues()) {
+      span->SetAttribute(name, \"\");
       continue;
     }
-    if (absl::EqualsIgnoreCase(kv.first, "authorization")) {
-      span->SetAttribute(name, kv.second.front().substr(0, 32));
+    if (absl::EqualsIgnoreCase(kv.first, \"authorization\")) {
+      span->SetAttribute(name, kv.second.values().front().substr(0, 32));
       continue;
     }
-    span->SetAttribute(name, kv.second.front());
+    span->SetAttribute(name, kv.second.values().front());
   }
   return span;
 }
